@@ -5,6 +5,7 @@ pub enum Builtin {
     Exit,
     Type,
     PWD,
+    Cd,
 }
 
 impl FromStr for Builtin {
@@ -15,6 +16,7 @@ impl FromStr for Builtin {
             "exit" => Ok(Builtin::Exit),
             "type" => Ok(Builtin::Type),
             "pwd" => Ok(Builtin::PWD),
+            "cd" => Ok(Builtin::Cd),
             _ => Err(()),
         }
     }

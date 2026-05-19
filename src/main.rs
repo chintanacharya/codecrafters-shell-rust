@@ -88,5 +88,15 @@ fn process_builtin(builtin: &Builtin, line: &str) {
                 }
             }
         }
+        Builtin::Cd => {
+            if line.contains(|c: char| c.is_whitespace()) {
+                eprintln!("cd: too many args")
+            }
+
+            let cd_result = env::set_current_dir(line);
+            if (cd_result.is_err()) {
+                eprintln!("cd: failed to set CWD to {}", line)
+            }
+        }
     }
 }
