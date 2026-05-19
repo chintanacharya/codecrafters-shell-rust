@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{self, Write};
+use std::io::{self, ErrorKind, Write};
 use std::{os::unix::process::CommandExt, path::PathBuf, process::Command};
 
 use crate::{
@@ -94,8 +94,15 @@ fn process_builtin(builtin: &Builtin, line: &str) {
             }
 
             let cd_result = env::set_current_dir(line);
-            if (cd_result.is_err()) {
-                eprintln!("cd: failed to set CWD to {}", line)
+            match cd_result {
+                Ok(_) => {}
+                Err(e) => {
+                    if e.kind() == ErrorKind::NotFound {
+                        eprintln!("cd: {}: No such file or directory", line)
+                    } else {
+                        eprintln!("cd: failed to switch to {}: {}", line, e)
+                    }
+                }
             }
         }
     }
