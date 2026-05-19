@@ -61,16 +61,31 @@ pub fn process_builtin(builtin: &Builtin, line: &str) {
                 eprintln!("cd: too many args")
             }
 
-            let cd_result = env::set_current_dir(line);
-            match cd_result {
-                Ok(_) => {}
-                Err(e) => {
-                    if e.kind() == ErrorKind::NotFound {
-                        eprintln!("cd: {}: No such file or directory", line)
-                    } else {
-                        eprintln!("cd: failed to switch to {}: {}", line, e)
+            if line == "~" {
+                let env_var_result = env::var("HOME");
+                match env_var_result {
+                    Ok(home_dir) => switch_to_dir(&home_dir),
+                    Err(_) => {
+                        eprintln!("cd: cannot switch to ~: HOME not set");
+                        return;
                     }
                 }
+            } else {
+                switch_to_dir(line)
+            }
+        }
+    }
+}
+
+fn switch_to_dir(target_dir: &str) {
+    let cd_result = env::set_current_dir(target_dir);
+    match cd_result {
+        Ok(_) => {}
+        Err(e) => {
+            if e.kind() == ErrorKind::NotFound {
+                eprintln!("cd: {}: No such file or directory", target_dir)
+            } else {
+                eprintln!("cd: failed to switch to {}: {}", target_dir, e)
             }
         }
     }
