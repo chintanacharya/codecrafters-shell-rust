@@ -20,5 +20,8 @@ fn repl() {
 }
 
 fn process_cmd(cmd: &str) {
-    println!("{cmd}: command not found");
+    match cmd {
+        "exit" => std::process::exit(0),
+        _ => println!("{cmd}: command not found"),
+    }
 }
