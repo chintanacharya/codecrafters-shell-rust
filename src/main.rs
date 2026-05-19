@@ -48,7 +48,7 @@ fn process_cmd(cmd: &str, line: &str) {
 
 fn process_exe(target_path: &PathBuf, line: &str) {
     let _ = Command::new(target_path)
-        .arg(line)
+        .args(line.split_ascii_whitespace())
         .stdout(io::stdout())
         .stderr(io::stderr())
         .output()
