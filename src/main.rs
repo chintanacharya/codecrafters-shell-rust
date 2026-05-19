@@ -33,7 +33,7 @@ fn repl() {
 fn process_line(line: &str) {
     let cmd_term_index = line.find(|c: char| c.is_whitespace());
     match cmd_term_index {
-        Some(index) => process_cmd(&line[0..index], &line[index..].trim()),
+        Some(index) => process_cmd(&line[0..index].trim(), &line[index..].trim()),
         None => process_cmd(line, ""),
     }
 }

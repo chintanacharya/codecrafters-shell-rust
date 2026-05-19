@@ -10,7 +10,7 @@ pub enum ResolveResult {
 }
 
 pub fn resolve_command(cmd: &str) -> ResolveResult {
-    if cmd.trim().len() == 0 {
+    if cmd.len() == 0 {
         return ResolveResult::InvalidPath;
     }
 
