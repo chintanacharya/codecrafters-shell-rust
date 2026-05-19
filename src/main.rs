@@ -51,6 +51,9 @@ fn process_builtin(builtin: &Builtin, line: &str) {
             let resolved = resolve_command(line);
             match resolved {
                 ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
+                ResolveResult::Command(command_path) => {
+                    println!("{} is {}", line, command_path.to_string_lossy())
+                }
                 _ => println!("{line}: not found"),
             }
         }
