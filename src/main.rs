@@ -11,7 +11,6 @@ pub mod builtin;
 pub mod command;
 
 fn main() {
-    // TODO: Uncomment the code below to pass the first stage
     repl();
 }
 
