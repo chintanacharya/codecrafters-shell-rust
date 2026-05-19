@@ -62,17 +62,21 @@ fn find_exe_at_path(target_path: &PathBuf) -> Option<bool> {
 }
 
 pub fn process_exe(target_path: &PathBuf, line: &str) {
-    let _ = Command::new(target_path)
+    let output = Command::new(target_path)
         .arg0(target_path.file_name().unwrap_or(target_path.as_os_str()))
         .args(line.split_ascii_whitespace())
         .stdout(io::stdout())
         .stderr(io::stderr())
-        .output()
-        .expect(
-            format!(
-                "Failed to run executable: {}",
-                target_path.to_string_lossy()
+        .output();
+
+    match output {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!(
+                "Failed to run executable at {}: {}",
+                target_path.to_string_lossy(),
+                e
             )
-            .as_str(),
-        );
+        }
+    }
 }
