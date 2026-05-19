@@ -1,10 +1,8 @@
-use std::env;
-use std::io::{self, ErrorKind, Write};
-use std::{os::unix::process::CommandExt, path::PathBuf, process::Command};
+use std::io::{self, Write};
 
 use crate::{
-    builtin::Builtin,
-    command::{ResolveResult, resolve_command},
+    builtin::process_builtin,
+    command::{ResolveResult, process_exe, resolve_command},
 };
 
 pub mod builtin;
@@ -45,65 +43,5 @@ fn process_cmd(cmd: &str, line: &str) {
         ResolveResult::Command(command_path) => process_exe(&command_path, line),
         ResolveResult::NotFound => println!("{cmd}: command not found"),
         ResolveResult::InvalidPath => println!("{cmd}: invalid or blank command"),
-    }
-}
-
-fn process_exe(target_path: &PathBuf, line: &str) {
-    let _ = Command::new(target_path)
-        .arg0(target_path.file_name().unwrap_or(target_path.as_os_str()))
-        .args(line.split_ascii_whitespace())
-        .stdout(io::stdout())
-        .stderr(io::stderr())
-        .output()
-        .expect(
-            format!(
-                "Failed to run executable: {}",
-                target_path.to_string_lossy()
-            )
-            .as_str(),
-        );
-}
-
-fn process_builtin(builtin: &Builtin, line: &str) {
-    match builtin {
-        Builtin::Echo => println!("{}", line),
-        Builtin::Exit => std::process::exit(0),
-        Builtin::Type => {
-            let resolved = resolve_command(line);
-            match resolved {
-                ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
-                ResolveResult::Command(command_path) => {
-                    println!("{} is {}", line, command_path.display())
-                }
-                ResolveResult::NotFound => println!("{line}: not found"),
-                ResolveResult::InvalidPath => println!("{line}: invalid or blank command"),
-            }
-        }
-        Builtin::PWD => {
-            let cwd_result = env::current_dir();
-            match cwd_result {
-                Ok(dir) => println!("{}", dir.display()),
-                Err(_) => {
-                    // TODO: error handling is not specified
-                }
-            }
-        }
-        Builtin::Cd => {
-            if line.contains(|c: char| c.is_whitespace()) {
-                eprintln!("cd: too many args")
-            }
-
-            let cd_result = env::set_current_dir(line);
-            match cd_result {
-                Ok(_) => {}
-                Err(e) => {
-                    if e.kind() == ErrorKind::NotFound {
-                        eprintln!("cd: {}: No such file or directory", line)
-                    } else {
-                        eprintln!("cd: failed to switch to {}: {}", line, e)
-                    }
-                }
-            }
-        }
     }
 }

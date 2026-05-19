@@ -1,4 +1,6 @@
-use std::str::FromStr;
+use std::{env, io::ErrorKind, str::FromStr};
+
+use crate::command::{ResolveResult, resolve_command};
 
 pub enum Builtin {
     Echo,
@@ -30,6 +32,46 @@ pub fn parse_builtin(cmd: &str) -> Option<Builtin> {
     }
 }
 
-pub fn is_builtin(cmd: &str) -> bool {
-    parse_builtin(cmd).is_some()
+pub fn process_builtin(builtin: &Builtin, line: &str) {
+    match builtin {
+        Builtin::Echo => println!("{}", line),
+        Builtin::Exit => std::process::exit(0),
+        Builtin::Type => {
+            let resolved = resolve_command(line);
+            match resolved {
+                ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
+                ResolveResult::Command(command_path) => {
+                    println!("{} is {}", line, command_path.display())
+                }
+                ResolveResult::NotFound => println!("{line}: not found"),
+                ResolveResult::InvalidPath => println!("{line}: invalid or blank command"),
+            }
+        }
+        Builtin::PWD => {
+            let cwd_result = env::current_dir();
+            match cwd_result {
+                Ok(dir) => println!("{}", dir.display()),
+                Err(_) => {
+                    // TODO: error handling is not specified
+                }
+            }
+        }
+        Builtin::Cd => {
+            if line.contains(|c: char| c.is_whitespace()) {
+                eprintln!("cd: too many args")
+            }
+
+            let cd_result = env::set_current_dir(line);
+            match cd_result {
+                Ok(_) => {}
+                Err(e) => {
+                    if e.kind() == ErrorKind::NotFound {
+                        eprintln!("cd: {}: No such file or directory", line)
+                    } else {
+                        eprintln!("cd: failed to switch to {}: {}", line, e)
+                    }
+                }
+            }
+        }
+    }
 }

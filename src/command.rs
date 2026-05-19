@@ -1,4 +1,12 @@
-use std::{env, fs::File, os::unix::fs::PermissionsExt, path::PathBuf};
+use std::{
+    env,
+    fs::File,
+    io::{self},
+    os::unix::fs::PermissionsExt,
+    os::unix::process::CommandExt,
+    path::PathBuf,
+    process::Command,
+};
 
 use crate::builtin::{Builtin, parse_builtin};
 
@@ -51,4 +59,20 @@ fn find_exe_at_path(target_path: &PathBuf) -> Option<bool> {
     let permissions = file.metadata().ok()?.permissions();
 
     Some(permissions.mode() & 0o111 != 0)
+}
+
+pub fn process_exe(target_path: &PathBuf, line: &str) {
+    let _ = Command::new(target_path)
+        .arg0(target_path.file_name().unwrap_or(target_path.as_os_str()))
+        .args(line.split_ascii_whitespace())
+        .stdout(io::stdout())
+        .stderr(io::stderr())
+        .output()
+        .expect(
+            format!(
+                "Failed to run executable: {}",
+                target_path.to_string_lossy()
+            )
+            .as_str(),
+        );
 }
