@@ -29,10 +29,10 @@ fn repl() {
 }
 
 fn process_line(line: &str) {
-    let cmd_term_index = line.find(|c: char| c.is_whitespace());
-    match cmd_term_index {
-        Some(index) => process_cmd(&line[0..index].trim(), &line[index..].trim()),
+    let split_result = line.split_once(|c: char| c.is_whitespace());
+    match split_result {
         None => process_cmd(line, ""),
+        Some((command, line)) => process_cmd(command.trim(), line.trim()),
     }
 }
 
