@@ -1,6 +1,14 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
+use crate::{
+    builtin::Builtin,
+    command::{ResolveResult, resolve_command},
+};
+
+pub mod builtin;
+pub mod command;
+
 fn main() {
     // TODO: Uncomment the code below to pass the first stage
     repl();
@@ -28,9 +36,23 @@ fn process_line(line: &str) {
 }
 
 fn process_cmd(cmd: &str, line: &str) {
-    match cmd {
-        "exit" => std::process::exit(0),
-        "echo" => println!("{}", line),
+    let resolved = resolve_command(cmd);
+    match resolved {
+        ResolveResult::Builtin(builtin) => process_builtin(&builtin, line),
         _ => println!("{cmd}: command not found"),
+    }
+}
+
+fn process_builtin(builtin: &Builtin, line: &str) {
+    match builtin {
+        Builtin::Echo => println!("{}", line),
+        Builtin::Exit => std::process::exit(0),
+        Builtin::Type => {
+            let resolved = resolve_command(line);
+            match resolved {
+                ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
+                _ => println!("{line}: not found"),
+            }
+        }
     }
 }
