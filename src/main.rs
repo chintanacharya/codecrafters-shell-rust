@@ -1,3 +1,4 @@
+use std::env;
 use std::io::{self, Write};
 use std::{os::unix::process::CommandExt, path::PathBuf, process::Command};
 
@@ -69,10 +70,19 @@ fn process_builtin(builtin: &Builtin, line: &str) {
             match resolved {
                 ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
                 ResolveResult::Command(command_path) => {
-                    println!("{} is {}", line, command_path.to_string_lossy())
+                    println!("{} is {}", line, command_path.display())
                 }
                 ResolveResult::NotFound => println!("{line}: not found"),
                 ResolveResult::InvalidPath => println!("{line}: invalid or blank command"),
+            }
+        }
+        Builtin::PWD => {
+            let cwd_result = env::current_dir();
+            match cwd_result {
+                Ok(dir) => println!("{}", dir.display()),
+                Err(_) => {
+                    // TODO: error handling is not specified
+                }
             }
         }
     }

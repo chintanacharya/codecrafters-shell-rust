@@ -4,6 +4,7 @@ pub enum Builtin {
     Echo,
     Exit,
     Type,
+    PWD,
 }
 
 impl FromStr for Builtin {
@@ -13,6 +14,7 @@ impl FromStr for Builtin {
             "echo" => Ok(Builtin::Echo),
             "exit" => Ok(Builtin::Exit),
             "type" => Ok(Builtin::Type),
+            "pwd" => Ok(Builtin::PWD),
             _ => Err(()),
         }
     }
