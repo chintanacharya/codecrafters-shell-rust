@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::{path::PathBuf, process::Command};
 
 use crate::{
     builtin::Builtin,
@@ -39,8 +40,26 @@ fn process_cmd(cmd: &str, line: &str) {
     let resolved = resolve_command(cmd);
     match resolved {
         ResolveResult::Builtin(builtin) => process_builtin(&builtin, line),
-        _ => println!("{cmd}: command not found"),
+        ResolveResult::Command(command_path) => process_exe(&command_path, line),
+        ResolveResult::NotFound => println!("{cmd}: command not found"),
+        ResolveResult::InvalidPath => println!("{cmd}: invalid or blank command"),
     }
+}
+
+fn process_exe(target_path: &PathBuf, line: &str) {
+    println!("Running EXE with path {}", target_path.to_string_lossy());
+    let _ = Command::new(target_path)
+        .arg(line)
+        .stdout(io::stdout())
+        .stderr(io::stderr())
+        .output()
+        .expect(
+            format!(
+                "Failed to run executable: {}",
+                target_path.to_string_lossy()
+            )
+            .as_str(),
+        );
 }
 
 fn process_builtin(builtin: &Builtin, line: &str) {
@@ -54,7 +73,8 @@ fn process_builtin(builtin: &Builtin, line: &str) {
                 ResolveResult::Command(command_path) => {
                     println!("{} is {}", line, command_path.to_string_lossy())
                 }
-                _ => println!("{line}: not found"),
+                ResolveResult::NotFound => println!("{line}: not found"),
+                ResolveResult::InvalidPath => println!("{line}: invalid or blank command"),
             }
         }
     }

@@ -6,9 +6,14 @@ pub enum ResolveResult {
     Builtin(Builtin),
     Command(PathBuf),
     NotFound,
+    InvalidPath,
 }
 
 pub fn resolve_command(cmd: &str) -> ResolveResult {
+    if cmd.trim().len() == 0 {
+        return ResolveResult::InvalidPath;
+    }
+
     let builtin_opt = parse_builtin(cmd);
 
     match builtin_opt {
