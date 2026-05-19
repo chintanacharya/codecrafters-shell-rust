@@ -21,9 +21,12 @@ fn repl() {
 
         let mut raw_line = String::new();
         io::stdin().read_line(&mut raw_line).unwrap();
-        let trimmed_line = raw_line.trim_end();
+        let trimmed_line = raw_line.trim();
 
-        process_line(&trimmed_line);
+        // Do not try to process blank lines
+        if trimmed_line.len() > 0 {
+            process_line(&trimmed_line);
+        }
     }
 }
 
