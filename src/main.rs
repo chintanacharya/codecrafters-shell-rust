@@ -47,7 +47,6 @@ fn process_cmd(cmd: &str, line: &str) {
 }
 
 fn process_exe(target_path: &PathBuf, line: &str) {
-    println!("Running EXE with path {}", target_path.to_string_lossy());
     let _ = Command::new(target_path)
         .arg(line)
         .stdout(io::stdout())
