@@ -35,7 +35,7 @@ pub fn resolve_command(cmd: &str) -> ResolveResult {
 fn path_candidates() -> Vec<PathBuf> {
     let path_res = env::var("PATH");
     match path_res {
-        Err(_) => panic!("PATH not found"),
+        Err(_) => Vec::new(),
         Ok(path_var) => env::split_paths(&path_var).collect(),
     }
 }
