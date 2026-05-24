@@ -61,10 +61,10 @@ fn find_exe_at_path(target_path: &PathBuf) -> Option<bool> {
     Some(permissions.mode() & 0o111 != 0)
 }
 
-pub fn process_exe(target_path: &PathBuf, line: &str) {
+pub fn process_exe(target_path: &PathBuf, args: Vec<&str>) {
     let output = Command::new(target_path)
         .arg0(target_path.file_name().unwrap_or(target_path.as_os_str()))
-        .args(line.split_ascii_whitespace())
+        .args(args)
         .stdout(io::stdout())
         .stderr(io::stderr())
         .output();

@@ -32,19 +32,20 @@ pub fn parse_builtin(cmd: &str) -> Option<Builtin> {
     }
 }
 
-pub fn process_builtin(builtin: &Builtin, line: &str) {
+pub fn process_builtin(builtin: &Builtin, args: Vec<&str>) {
     match builtin {
-        Builtin::Echo => println!("{}", line),
+        Builtin::Echo => println!("{}", args.join(" ")),
         Builtin::Exit => std::process::exit(0),
         Builtin::Type => {
-            let resolved = resolve_command(line);
+            let command = args[0];
+            let resolved = resolve_command(command);
             match resolved {
-                ResolveResult::Builtin(_) => println!("{line} is a shell builtin"),
+                ResolveResult::Builtin(_) => println!("{command} is a shell builtin"),
                 ResolveResult::Command(command_path) => {
-                    println!("{} is {}", line, command_path.display())
+                    println!("{} is {}", command, command_path.display())
                 }
-                ResolveResult::NotFound => println!("{line}: not found"),
-                ResolveResult::InvalidPath => println!("{line}: invalid or blank command"),
+                ResolveResult::NotFound => println!("{command}: not found"),
+                ResolveResult::InvalidPath => println!("{command}: invalid or blank command"),
             }
         }
         Builtin::PWD => {
@@ -57,11 +58,13 @@ pub fn process_builtin(builtin: &Builtin, line: &str) {
             }
         }
         Builtin::Cd => {
-            if line.contains(|c: char| c.is_whitespace()) {
+            if args.len() > 1 {
                 eprintln!("cd: too many args")
             }
 
-            if line == "~" {
+            let dir = args[0];
+
+            if dir == "~" {
                 let env_var_result = env::var("HOME");
                 match env_var_result {
                     Ok(home_dir) => switch_to_dir(&home_dir),
@@ -71,7 +74,7 @@ pub fn process_builtin(builtin: &Builtin, line: &str) {
                     }
                 }
             } else {
-                switch_to_dir(line)
+                switch_to_dir(dir)
             }
         }
     }
